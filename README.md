@@ -47,9 +47,7 @@ A Vision-Based Cooperative Navigation framework for mobile robots in unstructure
 
 ### 📺 实验演示视频 (Experimental Demo)
 
-<video src="wsd_ws/assets/demo_video.mp4" width="100%" controls>
-  Your browser does not support the video tag.
-</video>
+[![Watch the demo](wsd_ws/assets/video_cover.png)](wsd_ws/assets/demo_video.mp4)
 
 ---
 
