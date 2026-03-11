@@ -32,7 +32,7 @@ A Vision-Based Cooperative Navigation framework for mobile robots in unstructure
   * **Intel RealSense D435i**: Depth camera for local perception and target detection.
 * **OS & Framework**: Ubuntu 20.04 with ROS Noetic.
   
-![Robot Platform](./assets/robot_platform.png)
+![Robot Platform](./wsd_ws/assets/robot_platform.png)
 
 ### Global Surveillance System
 * **Camera**: Dahua Imou TP6C Monocular Camera.
@@ -41,7 +41,7 @@ A Vision-Based Cooperative Navigation framework for mobile robots in unstructure
 * **Deployment**: Fixed at a diagonal position of the workspace via a tripod with a pitch angle of approximately 45°.
 * **Communication**: Real-time video streams are transmitted over a wireless network to the edge computing node for YOLO-based detection and Homography-based ground projection.
 
-![Experimental Field](./assets/field_setup.png)
+![Experimental Field](./wsd_ws/assets/field_setup.png)
   
 ---
 ## 🔗 Related Resources
