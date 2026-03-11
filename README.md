@@ -44,6 +44,15 @@ A Vision-Based Cooperative Navigation framework for mobile robots in unstructure
 ![Experimental Field](./wsd_ws/assets/field_setup.png)
   
 ---
+
+### 📺 实验演示视频 (Experimental Demo)
+
+[![Watch the Demo](./wsd_ws/assets/video_cover.png)](./wsd_ws/assets/demo_video.mp4)
+
+> **Note**: Click on the picture above to play the experimental demonstration video. This video shows the collaborative navigation process of the robot in an unstructured environment.
+
+---
+
 ## 🔗 Related Resources
 
 * **jie_ware driver package**:
