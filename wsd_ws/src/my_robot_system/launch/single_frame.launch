@@ -1,0 +1,74 @@
+<launch>
+  <!-- 参数 -->
+  <arg name="world_name" default="$(find my_robot_system)/worlds/dsw.world"/>
+  <arg name="gui" default="true"/>
+  <arg name="rviz" default="true"/>
+  <arg name="x_pos" default="0.0"/>
+  <arg name="y_pos" default="0.0"/>
+  <arg name="z_pos" default="0.0"/>
+
+  <!-- 地图相关参数 -->
+  <arg name="map_file" default="$(find my_robot_system)/maps/map1/dsw_map.yaml"/>
+  <arg name="open_rviz" default="true"/>
+  
+  <!-- 设置Gazebo模型路径 -->
+  <env name="GAZEBO_MODEL_PATH" value="$(find my_robot_system)/models:$(optenv GAZEBO_MODEL_PATH)" />
+  
+  <!-- 使用WAFFLE模型描述 -->
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find turtlebot3_description)/urdf/turtlebot3_waffle.urdf.xacro'" />
+
+  <!-- 发布机器人状态 -->
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+    <param name="publish_frequency" type="double" value="50.0" />
+  </node>
+
+  <!-- 启动Gazebo仿真 -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(arg world_name)" />
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+    <arg name="verbose" value="true"/>
+  </include>
+  
+  <!-- 地图服务器 - 使用完整路径 -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" output="screen" respawn="true">
+    <param name="frame_id" value="map"/>
+    <!-- 设置工作目录到maps文件夹 -->
+    <env name="PWD" value="$(find my_robot_system)/maps"/>
+  </node>
+
+  <!-- 发布静态TF变换：从map到odom -->
+  <node pkg="tf" type="static_transform_publisher" name="map_to_odom" 
+        args="0 0 0 0 0 0 map odom 100" />
+        
+  <!-- AMCL定位 -->
+  <include file="$(find turtlebot3_navigation)/launch/amcl.launch">
+    <arg name="initial_pose_x" value="$(arg x_pos)"/>
+    <arg name="initial_pose_y" value="$(arg y_pos)"/>
+    <arg name="initial_pose_a" value="0.0"/>
+  </include>
+
+  <!-- move_base导航栈 -->
+  <include file="$(find turtlebot3_navigation)/launch/move_base.launch">
+    <arg name="model" value="waffle" />
+    <arg name="move_forward_only" value="false"/>
+  </include>
+        
+  <!-- 单帧图像驱动的一次性导航 -->
+  <node name="single_frame_navigator" pkg="my_robot_system" type="single_frame_navigator.py" output="screen" required="false">
+    <param name="image_path" value="$(find my_robot_system)/maps/map1/yellow_doll_test.png"/>
+    <param name="homography_path" value="$(find my_robot_system)/scripts/homography.npy"/>
+    <param name="safe_distance" value="0.8"/>
+  </node>
+
+  <!-- RViz -->
+  <group if="$(arg rviz)">
+    <node name="my_rviz" pkg="rviz" type="rviz" respawn="false"
+          args="-d $(find my_robot_system)/rviz/simulation.rviz" output="screen">
+      <param name="use_sim_time" value="true"/>
+    </node>
+  </group>
+</launch>

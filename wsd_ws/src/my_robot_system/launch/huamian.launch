@@ -1,0 +1,16 @@
+<launch>
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+        <arg name="align_depth" value="false"/>
+        <arg name="enable_color" value="true"/>
+        <arg name="enable_depth" value="false"/>
+        <arg name="enable_infra1" value="false"/>
+        <arg name="enable_infra2" value="false"/>
+        <arg name="color_width" value="640"/>
+        <arg name="color_height" value="480"/>
+        <arg name="color_fps" value="15"/>
+    </include>
+
+    <node pkg="my_robot_system" type="huamian.py" name="visual_monitor_node" output="screen">
+        <param name="rtsp_url" value="rtsp://admin:w15032887069@192.168.43.15:554/cam/realmonitor?channel=1&amp;subtype=1"/>
+    </node>
+</launch>

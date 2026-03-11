@@ -1,0 +1,38 @@
+<launch>
+  <arg name="target" default="tool_box" />
+
+  <include file="$(find turn_on_wheeltec_robot)/launch/turn_on_wheeltec_robot.launch">
+    <arg name="navigation" default="true"/>
+  </include>
+  
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find turn_on_wheeltec_robot)/map/WHEELTEC.yaml" />
+  
+  <include file="$(find turn_on_wheeltec_robot)/launch/wheeltec_lidar.launch" />
+  
+  <node pkg="jie_ware" type="lidar_loc" name="lidar_loc">
+    <param name="base_frame" value="base_link" />
+    <param name="laser_frame" value="laser" />
+  </node>
+
+  <node pkg="my_robot_system" type="yolo_realtime_navigator.py" name="global_yolo" output="screen">
+    <param name="rtsp_url" value="rtsp://admin:w15032887069@192.168.43.15:554/cam/realmonitor?channel=1&amp;subtype=1"/>
+    <param name="homography_path" value="$(find my_robot_system)/scripts/homography_real2.npy"/>
+    <param name="global_model_path" value="$(find my_robot_system)/dataset/tool_robot.pt"/>
+    <param name="safe_distance" value="0.8"/>
+  </node>
+
+  <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+    <arg name="enable_color" value="true" />
+    <arg name="enable_depth" value="false" />
+    <arg name="color_width" value="640"/>
+    <arg name="color_height" value="480"/>
+    <arg name="color_fps" value="15" />
+  </include>
+
+  <node name="active_search_coordinator" pkg="my_robot_system" type="coordinator.py" output="screen">
+    <param name="target" value="$(arg target)" />
+    <param name="global_detection_topic" value="/global/target_detected" />
+    <param name="timeout_seconds" value="10.0" />
+  </node>
+
+</launch>

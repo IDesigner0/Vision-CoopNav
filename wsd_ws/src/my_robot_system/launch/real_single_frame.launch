@@ -1,0 +1,33 @@
+<launch>
+  <!-- 开启机器人底层相关节点 同时开启导航功能-->
+  <include file="$(find turn_on_wheeltec_robot)/launch/turn_on_wheeltec_robot.launch">
+    <arg name="navigation" default="true"/>
+  </include>
+
+  <!-- 设置需要用于导航的地图 -->
+  <arg name="map_file" default="$(find turn_on_wheeltec_robot)/map/WHEELTEC.yaml"/>
+  <node name="map_server_for_test" pkg="map_server" type="map_server" args="$(arg map_file)">
+  </node>
+
+  <!-- 开启雷达 -->
+  <include file="$(find turn_on_wheeltec_robot)/launch/wheeltec_lidar.launch" />
+
+  <!-- 开启 AMCL 定位 -->
+  <include file="$(find turn_on_wheeltec_robot)/launch/include/amcl.launch" />
+ 
+  <!-- MarkerArray 功能节点 -->
+  <node name="send_mark" pkg="turn_on_wheeltec_robot" type="send_mark.py"/>
+
+  <!-- move_base 节点检测 -->
+  <node name="node_detection" pkg="turn_on_wheeltec_robot" type="node_ping.py">
+    <param name="node_name" type="string" value="/move_base"/>
+  </node>
+
+  <!-- 单帧图像导航节点 -->
+  <node name="single_frame_navigator" pkg="my_robot_system" type="single_frame_navigator.py" output="screen" required="false">
+    <param name="image_path" value="$(find my_robot_system)/maps/calib_image.jpg"/>
+    <param name="homography_path" value="$(find my_robot_system)/scripts/homography_real.npy"/>
+    <param name="safe_distance" value="0.8"/>
+  </node>
+
+</launch>

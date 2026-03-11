@@ -1,0 +1,39 @@
+<launch>
+  <!-- 开启机器人底层相关节点 同时开启导航功能 -->
+  <include file="$(find turn_on_wheeltec_robot)/launch/turn_on_wheeltec_robot.launch">
+    <arg name="navigation" default="true"/>
+  </include>
+
+  <!-- 设置用于导航的地图 -->
+  <arg name="map_file" default="$(find turn_on_wheeltec_robot)/map/WHEELTEC.yaml"/>
+  <node name="map_server_for_test" pkg="map_server" type="map_server" args="$(arg map_file)" />
+
+  <!-- 开启雷达 -->
+  <include file="$(find turn_on_wheeltec_robot)/launch/wheeltec_lidar.launch" />
+
+  <!-- 开启 AMCL 定位 -->
+  <!--<include file="$(find turn_on_wheeltec_robot)/launch/include/amcl.launch" />-->
+ 
+  <node pkg="jie_ware" type="lidar_loc" name="lidar_loc" >
+  <param name="base_frame" value="base_link" />
+  <param name="laser_frame" value="laser" />
+  </node>
+ 
+  <!-- MarkerArray 功能节点 -->
+  <node name="send_mark" pkg="turn_on_wheeltec_robot" type="send_mark.py"/>
+
+  <!-- move_base 节点检测 -->
+  <node name="node_detection" pkg="turn_on_wheeltec_robot" type="node_ping.py">
+    <param name="node_name" type="string" value="/move_base"/>
+  </node>
+
+  <!-- 实时视频流导航节点（使用乐橙 TP6C RTSP 流） -->
+  <node name="realtime_navigator" pkg="my_robot_system" type="realtime_navigator.py" output="screen" required="false">
+  
+    <param name="rtsp_url" value="rtsp://admin:w15032887069@192.168.43.15:554/cam/realmonitor?channel=1&amp;subtype=1" />
+    <param name="homography_path" value="$(find my_robot_system)/scripts/homography_real2.npy" />
+    <param name="safe_distance" value="0.6" />
+    <param name="process_interval" value="2.0" /> <!-- 每2秒处理一帧 -->
+  </node>
+
+</launch>

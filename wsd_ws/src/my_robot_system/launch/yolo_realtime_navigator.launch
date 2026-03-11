@@ -1,0 +1,49 @@
+<launch>
+
+  <!-- 开启机器人底层相关节点 同时开启导航功能 -->
+  <include file="$(find turn_on_wheeltec_robot)/launch/turn_on_wheeltec_robot.launch">
+    <arg name="navigation" default="true"/>
+  </include>
+  <!-- 设置用于导航的地图 -->
+  <arg name="map_file" default="$(find turn_on_wheeltec_robot)/map/WHEELTEC.yaml"/>
+  <node name="map_server_for_test" pkg="map_server" type="map_server" args="$(arg map_file)" />
+  <!-- 开启雷达 -->
+  <include file="$(find turn_on_wheeltec_robot)/launch/wheeltec_lidar.launch" />
+  <!-- 自定义激光定位节点（替代 AMCL） -->
+  <node pkg="jie_ware" type="lidar_loc" name="lidar_loc">
+    <param name="base_frame" value="base_link" />
+    <param name="laser_frame" value="laser" />
+  </node>
+  <!-- MarkerArray 功能节点 -->
+  <node name="send_mark" pkg="turn_on_wheeltec_robot" type="send_mark.py"/>
+  <!-- move_base 节点检测 -->
+  <node name="node_detection" pkg="turn_on_wheeltec_robot" type="node_ping.py">
+    <param name="node_name" type="string" value="/move_base"/>
+  </node>
+  <!-- 启动 RealSense D435i 相机（仅启用彩色图像） -->
+  <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+    <arg name="align_depth" value="false"/>
+    <arg name="enable_color" value="true"/>
+    <arg name="enable_depth" value="false"/>
+    <arg name="enable_infra1" value="false"/>
+    <arg name="enable_infra2" value="false"/>
+    <arg name="color_width" value="640"/>
+    <arg name="color_height" value="480"/>
+    <arg name="color_fps" value="15"/>
+  </include>
+  <!-- YOLO 实时导航节点 -->
+  <node pkg="my_robot_system" type="yolo_realtime_navigator.py" name="realtime_navigator" output="screen">
+    <param name="rtsp_url" value="rtsp://admin:w15032887069@192.168.43.15:554/cam/realmonitor?channel=1&amp;subtype=1"/>
+    
+    <param name="homography_path" value="$(find my_robot_system)/scripts/homography_real2.npy"/>
+    
+    <param name="global_model_path" value="$(find my_robot_system)/dataset/tool_robot.pt"/>
+    <param name="local_model_path" value="$(find my_robot_system)/dataset/tool_box.pt"/>
+    
+    <param name="safe_distance" value="0.3"/>
+    <param name="process_interval" value="2.0"/>
+    <param name="confidence_threshold" value="0.6"/>
+    <param name="target_merge_radius" value="0.3"/> 
+  </node>
+
+</launch>
